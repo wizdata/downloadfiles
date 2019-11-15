@@ -1,0 +1,26 @@
+name: Doenlaod Files
+# This workflow is triggered on pushes to the repository.
+on: [push]
+
+jobs:
+  build:
+    # Job name is Greeting
+    name: DownladFiles
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+      #- name: Checkout
+      #  uses: actions/checkout@v1    
+      # This step uses GitHub's wget: https://github.com/wei/wget
+      - name: wget
+        uses: wei/wget@v1
+        with:
+          args: -qO- https://dl.google.com/go/go1.13.4.windows-amd64.zip
+      # This step releases the downloaded file from the previous step's action.
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: go1.13.4.windows-amd64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
