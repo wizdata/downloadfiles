@@ -1,4 +1,4 @@
-name: Doenlaod Files
+name: Downlaod Files
 # This workflow is triggered on pushes to the repository.
 on: [push]
 
@@ -15,7 +15,7 @@ jobs:
       - name: wget
         uses: wei/wget@v1
         with:
-          args: -qO- https://dl.google.com/go/go1.13.4.windows-amd64.zip
+          args: -q https://dl.google.com/go/go1.13.4.windows-amd64.zip
       # This step releases the downloaded file from the previous step's action.
       - name: Release
         uses: softprops/action-gh-release@v1
