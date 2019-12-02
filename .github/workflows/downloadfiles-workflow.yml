@@ -55,9 +55,8 @@ jobs:
         with:
           args: zip -qq -r /processing-times.zip /processing-times
       - name: Release
-        if: success() && TAG != null
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: success() && TAG != null && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1        
         with:
           files: processing-times.zip
         env:
