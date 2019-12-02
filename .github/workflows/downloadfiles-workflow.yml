@@ -48,7 +48,7 @@ jobs:
         run httrack "https://egov.uscis.gov/processing-times/" -O "/processing-times" "+https://egov.uscis.gov/processing-times/*"
       - name: zip folder
         if: TAG != null
-        - uses: montudor/action-zip@v0.1.0
+        uses: montudor/action-zip@v0.1.0
         with:
         args: zip -qq -r ./processing-times.zip /processing-times
       - name: Release
