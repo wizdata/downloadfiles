@@ -1,4 +1,4 @@
-name: Download Files
+name: Download files
 # This workflow is triggered on pushes to the repository.
 on: [push]
 env:
@@ -6,16 +6,18 @@ env:
 
 jobs:
   checkout_tag:  
-    name: Checkout Tag
+    name: Checkout tag
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Get Previous tag
+      - name: Get previous tag
         id: previoustag
+        if: success()
         uses: "WyriHaximus/github-action-get-previous-tag@master"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"  
-      - shell: bash
+      - name: Set tag
+        if: success()
         run: |
           TAG = ${{steps.previoustag.outputs.tag}}
   download_files:  
@@ -23,36 +25,37 @@ jobs:
     needs: checkout_tag
     runs-on: ubuntu-latest
     steps:
-      - name: wget
+      - name: Wget
         if: TAG == null
         uses: wei/wget@v1
         with:
           args: -q https://dl.google.com/go/go1.13.4.windows-amd64.zip
       - name: Release
-        if: TAG == null && startsWith(github.ref, 'refs/tags/')
+        if: success() && TAG == null && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1        
         with:
           files: go1.13.4.windows-amd64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   copy_web_site:          
-    name: Copy Web Site
+    name: Copy web site
     needs: checkout_tag
     runs-on: ubuntu-latest
     steps:
-      - name: install webhttrack
+      - name: Install webhttrack
         if: TAG != null
         run: sudo apt-get install webhttrack
-      - name: apt-get
-        if: TAG != null
-        run httrack https://egov.uscis.gov/processing-times/ -O /processing-times +https://egov.uscis.gov/processing-times/*
+      - name: Copy web site
+        if: success() && TAG != null
+        run: |
+          httrack 'https://egov.uscis.gov/processing-times/' -O '/processing-times' +'https://egov.uscis.gov/processing-times/*'
       - name: zip folder
-        if: TAG != null
+        if: success() && TAG != null
         uses: montudor/action-zip@v0.1.0
         with:
         args: zip -qq -r ./processing-times.zip /processing-times
       - name: Release
-        if: TAG != null
+        if: success() && TAG != null
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
