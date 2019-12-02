@@ -45,7 +45,7 @@ jobs:
         run: sudo apt-get install webhttrack
       - name: apt-get
         if: TAG != null
-        run httrack "https://egov.uscis.gov/processing-times/" -O "/processing-times" "+https://egov.uscis.gov/processing-times/*"
+        run httrack https://egov.uscis.gov/processing-times/ -O /processing-times +https://egov.uscis.gov/processing-times/*
       - name: zip folder
         if: TAG != null
         uses: montudor/action-zip@v0.1.0
