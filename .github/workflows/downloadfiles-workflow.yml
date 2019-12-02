@@ -1,26 +1,61 @@
-name: Downlaod Files
+name: Download Files
 # This workflow is triggered on pushes to the repository.
 on: [push]
+env:
+  TAG: null
 
 jobs:
-  build:
-    # Job name is Greeting
-    name: DownladFiles
-    # This job runs on Linux
+  checkout_tag:  
+    name: Checkout Tag
     runs-on: ubuntu-latest
     steps:
-      #- name: Checkout
-      #  uses: actions/checkout@v1    
-      # This step uses GitHub's wget: https://github.com/wei/wget
+      - uses: actions/checkout@v1
+      - name: Get Previous tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@master"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"  
+      - shell: bash
+        run: |
+          TAG = ${{steps.previoustag.outputs.tag}}
+  download_files:  
+    name: Download files
+    needs: checkout_tag
+    runs-on: ubuntu-latest
+    steps:
       - name: wget
+        if: TAG == null
         uses: wei/wget@v1
         with:
           args: -q https://dl.google.com/go/go1.13.4.windows-amd64.zip
-      # This step releases the downloaded file from the previous step's action.
       - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: TAG == null && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1        
         with:
           files: go1.13.4.windows-amd64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  copy_web_site:          
+    name: Copy Web Site
+    needs: checkout_tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: install webhttrack
+        if: TAG != null
+        run: sudo apt-get install webhttrack
+      - name: apt-get
+        if: TAG != null
+        run httrack "https://egov.uscis.gov/processing-times/" -O "/processing-times" "+https://egov.uscis.gov/processing-times/*"
+      - name: zip folder
+        if: TAG != null
+        - uses: montudor/action-zip@v0.1.0
+        with:
+        args: zip -qq -r ./processing-times.zip /processing-times
+      - name: Release
+        if: TAG != null
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: processing-times.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
