@@ -53,7 +53,7 @@ jobs:
         if: success() && TAG != null
         uses: montudor/action-zip@v0.1.0
         with:
-        args: zip -qq -r /processing-times.zip /processing-times
+          args: zip -qq -r /processing-times.zip /processing-times
       - name: Release
         if: success() && TAG != null
         uses: softprops/action-gh-release@v1
