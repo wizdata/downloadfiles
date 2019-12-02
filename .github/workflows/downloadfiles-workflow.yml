@@ -2,7 +2,7 @@ name: Download files
 # This workflow is triggered on pushes to the repository.
 on: [push]
 env:
-  TAG: null
+  TAG: test
 
 jobs:
   checkout_tag:  
