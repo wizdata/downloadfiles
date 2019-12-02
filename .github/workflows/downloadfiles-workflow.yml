@@ -25,7 +25,7 @@ jobs:
   download_files:  
     name: Download files
     needs: checkout_tag
-    if: TAG == null
+    if: env.TAG == null
     runs-on: ubuntu-latest
     steps:
       - run: echo $TAG    
@@ -43,7 +43,7 @@ jobs:
   copy_web_site:          
     name: Copy web site
     needs: checkout_tag
-    if: TAG != null
+    if: env.TAG != null
     runs-on: ubuntu-latest
     steps:
       - run: echo $TAG
