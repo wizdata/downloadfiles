@@ -20,5 +20,5 @@ jobs:
       - name: Set tag
         if: success()
         run: |
-          env.TAG = ${{steps.previoustag.outputs.tag}}
+          env.TAG = "${{steps.previoustag.outputs.tag}}"
       - run: echo $TAG          
