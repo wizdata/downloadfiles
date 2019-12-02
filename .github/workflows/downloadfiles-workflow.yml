@@ -9,6 +9,7 @@ jobs:
     name: Checkout tag
     runs-on: ubuntu-latest
     steps:
+      - run: echo $TAG
       - uses: actions/checkout@v1
       - name: Get previous tag
         id: previoustag
@@ -20,18 +21,20 @@ jobs:
         if: success()
         run: |
           TAG = ${{steps.previoustag.outputs.tag}}
+      - run: echo $TAG          
   download_files:  
     name: Download files
     needs: checkout_tag
+    if: TAG == null
     runs-on: ubuntu-latest
     steps:
-      - name: Wget
-        if: ${{TAG}} == null
+      - run: echo $TAG    
+      - name: Wget        
         uses: wei/wget@v1
         with:
           args: -q https://dl.google.com/go/go1.13.4.windows-amd64.zip
       - name: Release
-        if: success() && ${{TAG}} == null && startsWith(github.ref, 'refs/tags/')
+        if: success() && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1        
         with:
           files: go1.13.4.windows-amd64.zip
@@ -40,22 +43,23 @@ jobs:
   copy_web_site:          
     name: Copy web site
     needs: checkout_tag
+    if: TAG != null
     runs-on: ubuntu-latest
     steps:
-      - name: Install webhttrack
-        if: ${{TAG}} != null
+      - run: echo $TAG
+      - name: Install webhttrack        
         run: sudo apt-get install webhttrack
       - name: Copy web site
-        if: success() && ${{TAG}} != null
+        if: success()
         run: |
           httrack 'https://egov.uscis.gov/processing-times/' -O '/processing-times' +'https://egov.uscis.gov/processing-times/*'
       - name: zip folder
-        if: success() && ${{TAG}} != null
+        if: success()
         uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r /processing-times.zip /processing-times
       - name: Release
-        if: success() && ${{TAG}} != null && startsWith(github.ref, 'refs/tags/')
+        if: success() && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1        
         with:
           files: processing-times.zip
